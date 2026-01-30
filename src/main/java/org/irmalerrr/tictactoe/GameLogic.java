@@ -1,41 +1,36 @@
 package org.irmalerrr.tictactoe;
 
+import java.util.Arrays;
+
 public class GameLogic {
     private GameState gameState = GameState.NOT_STARTED;
-//    private final int[][] board = new int[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-    private final int[] rowsSum = new int[]{0, 0, 0};
-    private final int[] columnSum = new int[]{0, 0, 0};
-    private int diag1 = 0;
-    private int diag2 = 0;
+    private int[] sums = new int[]{0, 0, 0, 0, 0, 0, 0, 0}; //row1, row2, row3, column1, column2, column3, diagonal1, diagonal2
     private int emptyCells = 9;
 
     public GameLogic() {
     }
 
-    public void updateBoard(int i, int j, int count) {
-//        board[i][j] = count;
-        rowsSum[i] += count;
-        columnSum[j] += count;
-        if (rowsSum[i] == 3) gameState = GameState.CROSS_WIN;
-        if (rowsSum[i] == -3) gameState = GameState.ZERO_WIN;
-        if (columnSum[j] == 3) gameState = GameState.CROSS_WIN;
-        if (columnSum[j] == -3) gameState = GameState.ZERO_WIN;
-        if (i == j) {
-            diag1 += count;
-            if (diag1 == 3) gameState = GameState.CROSS_WIN;
-            if (diag1 == -3) gameState = GameState.ZERO_WIN;
-        }
-        if (i + j == 2) {
-            diag2 += count;
-            if (diag2 == 3) gameState = GameState.CROSS_WIN;
-            if (diag2 == -3) gameState = GameState.ZERO_WIN;
-        }
+    public void updateBoard(int row, int column, int count) {
+        sums[row] += count;
+        sums[3 + column] += count;
+        if (row == column) sums[6] += count;
+        if (row + column == 2) sums[7] += count;
         emptyCells--;
-        if (emptyCells == 0) gameState = GameState.DRAW;
+        updateGameState();
     }
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
+    private void updateGameState() {
+        if (Arrays.stream(sums).anyMatch(n -> n == 3)) gameState = GameState.CROSS_WIN;
+        else if (Arrays.stream(sums).anyMatch(n -> n == -3)) gameState = GameState.ZERO_WIN;
+        else if (emptyCells == 0) gameState = GameState.DRAW;
+        else if (gameState == GameState.ZERO_TURN) gameState = GameState.CROSS_TURN;
+        else gameState = GameState.ZERO_TURN;
+    }
+
+    public void reset() {
+        gameState = GameState.NOT_STARTED;
+        sums = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+        emptyCells = 9;
     }
 
     public GameState getGameState() {
